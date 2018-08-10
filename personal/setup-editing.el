@@ -35,7 +35,7 @@
 (prefer-coding-system 'utf-8)
 
 (setq-default indent-tabs-mode nil)
-(delete-selection-mode)
+(delete-selection-mode t)
 (global-set-key (kbd "RET") 'newline-and-indent)
 
 ;; GROUP: Editing -> Killing
@@ -341,9 +341,29 @@ line instead."
 ;; GROUP: Editing -> Yasnippet        ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (prelude-require-package 'yasnippet)
-(require 'yasnippet)
-(yas-global-mode 1)
-(define-key yas-minor-mode-map (kbd "<tab>") nil)
-(define-key yas-minor-mode-map (kbd "TAB") nil)
-(prelude-require-package 'yasnippet-snippets)
-(require 'yasnippet-snippets)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Package: yasnippet
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package yasnippet
+  :ensure t
+  :commands (yas-reload-all)
+  :init
+  (eval-when-compile
+    ;; Silence missing function warnings
+    (declare-function yas-global-mode "yasnippet.el"))
+  :defer 5
+  :config
+  (yas-global-mode t)
+  (yas-reload-all))
+(use-package yasnippet-snippets
+  :ensure t
+  :after yasnippet
+  :config
+  (yas-reload-all))
+;; Apparently the company-yasnippet backend shadows all backends that
+;; come after it. To work around this we assign yasnippet to a different
+;; keybind since actual source completion is vital.
+(use-package company-yasnippet
+  :bind ("C-M-y" . company-yasnippet)
+  :after (yasnippet)
+  )

@@ -8,7 +8,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; GROUP: Files -> Back up            ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defvar backup-directory "~/.backups")
+(defvar backup-directory (file-truename "~/.emacs.d/backups"))
 (if (not (file-exists-p backup-directory))
     (make-directory backup-directory t))
 (setq

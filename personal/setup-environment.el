@@ -28,6 +28,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (column-number-mode 1)
 
+;; Settings for searching
+(setq-default case-fold-search t ;case insensitive searches by default
+              search-highlight t) ;hilit matches when searching
+;; Highlight the line we are currently on
+(global-hl-line-mode t)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; PACKAGE: nyan-mode                    ;;
 ;;                                       ;;
