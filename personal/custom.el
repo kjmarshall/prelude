@@ -37,7 +37,7 @@
 ;; PACKAGE: projectile additional configuration ;;
 ;; -------------------------------------------- ;;
 (require 'projectile)
-(define-key projectile-mode-map projectile-keymap-prefix nil)
+;; (define-key projectile-mode-map projectile-keymap-prefix nil)
 (define-key projectile-mode-map (kbd "C-c p") #'projectile-command-map)
 (setq projectile-enable-caching t)
 
@@ -114,7 +114,7 @@
 (require 'ycmd)
 (prelude-require-package 'flycheck-ycmd)
 (require 'flycheck-ycmd)
-(defvar my:ycmd-server-command `("python3" ,(file-truename "~/.emacs.d/external/ycmd/ycmd/")))
+(defvar my:ycmd-server-command `("/nfs/pdx/home/kmarshal/km-nfs/python-3.7.0/bin/python3" ,(file-truename "~/.emacs.d/external/ycmd/ycmd/")))
 (defvar my:ycmd-extra-conf-whitelist `( ,(file-truename "~/.emacs.d/ycm_global_extra_conf.py") ) )
 (defvar my:ycmd-global-config (file-truename "~/.emacs.d/ycm_global_extra_conf.py") )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -184,7 +184,7 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
 (add-hook 'python-mode-hook
           (lambda ()
             (setq tab-width 4)))
-(setq-default pdb-command-name "python -m pdb")
+(setq-default pdb-command-name "python3 -m pdb")
 (prelude-require-package 'elpy)
 (use-package elpy
   :ensure t
@@ -194,11 +194,11 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
   (elpy-enable)
   )
 
-(prelude-require-package 'yapfify)
-(use-package yapfify
-  :ensure t
-  :init
-  (add-hook 'python-mode-hook 'yapf-mode))
+;; (prelude-require-package 'yapfify)
+;; (use-package yapfify
+;;   :ensure t
+;;   :init
+;;   (add-hook 'python-mode-hook 'yapf-mode))
 
 ;; --------------------- ;;
 ;; PACKAGE: company-jedi ;;
@@ -215,6 +215,7 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
     (add-to-list 'company-backends 'company-jedi))
   (add-hook 'python-mode-hook 'my/python-mode-hook)
   )
+
 
 ;; ----------------- ;;
 ;; PACKAGE: ess-view ;;
@@ -491,7 +492,7 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (web-mode string-inflection flycheck-pyflakes yapfify elpy zop-to-char zenburn-theme yasnippet-snippets ws-butler which-key volatile-highlights vlf use-package undo-tree sr-speedbar smartrep smartparens shell-pop recentf-ext rebox2 rainbow-mode rainbow-delimiters pyvenv operate-on-number nyan-mode neotree move-text modern-cpp-font-lock markdown-mode magit json-mode imenu-anywhere hl-todo highlight-symbol highlight-numbers highlight-indentation helm-projectile helm-descbinds helm-ag guru-mode grandshell-theme gitignore-mode gitconfig-mode git-timemachine gist geiser flycheck-ycmd flycheck-tip find-file-in-project expand-region ess-view elisp-slime-nav ein editorconfig easy-kill duplicate-thing dtrt-indent discover-my-major diminish diff-hl cuda-mode crux counsel-etags company-ycmd company-jedi company-auctex company-anaconda clean-aindent-mode clang-format cdlatex browse-kill-ring beacon auto-package-update anzu ace-window))))
+    (flycheck-tip rainbow-delimiters flycheck-ycmd company-ycmd ycmd modern-cpp-font-lock clang-format vlf recentf-ext ein auto-package-update s use-package zop-to-char zenburn-theme which-key volatile-highlights undo-tree smartrep smartparens operate-on-number move-text magit projectile imenu-anywhere hl-todo guru-mode gitignore-mode gitconfig-mode git-timemachine gist flycheck expand-region epl editorconfig easy-kill diminish diff-hl discover-my-major crux browse-kill-ring beacon anzu ace-window))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
