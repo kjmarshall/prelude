@@ -33,6 +33,24 @@
 (prelude-require-package 'ein)
 (require 'ein)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Set up code completion with company
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package company
+  :ensure t
+  :config
+  ;; Zero delay when pressing tab
+  ;; (setq company-idle-delay 0)
+  (add-hook 'after-init-hook 'global-company-mode)
+  ;; remove unused backends
+  (setq company-backends (delete 'company-semantic company-backends))
+  (setq company-backends (delete 'company-eclim company-backends))
+  (setq company-backends (delete 'company-xcode company-backends))
+  (setq company-backends (delete 'company-clang company-backends))
+  (setq company-backends (delete 'company-bbdb company-backends))
+  (setq company-backends (delete 'company-oddmuse company-backends))
+  )
+
 ;; -------------------------------------------- ;;
 ;; PACKAGE: projectile additional configuration ;;
 ;; -------------------------------------------- ;;
@@ -144,6 +162,26 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
         ;; Silence missing function warnings
         (declare-function global-ycmd-mode "ycmd.el"))
       (add-hook 'after-init-hook #'global-ycmd-mode)
+      :init
+      (setq company-idle-delay .5
+            company-echo-delay 0
+            company-auto-complete nil
+            company-require-match nil
+            company-minimum-prefix-length 2
+            company-show-numbers t
+            company-selection-wrap-around t
+            company-tooltip-align-annotations t
+            company-tooltip-minimum-width 50
+            company-frontends '(company-pseudo-tooltip-frontend)
+            company-backends '((company-capf
+                                company-yasnippet
+                                company-dabbrev-code
+                                company-files
+                                company-gtags
+                                company-etags
+                                company-keywords)
+                               company-dabbrev)
+            company-transformers '(company-sort-by-backend-importance))
       :config
       (progn
         (set-variable 'ycmd-server-command my:ycmd-server-command)
@@ -255,6 +293,15 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
   ;; Ignore files above 800kb
   (setq counsel-etags-max-file-size 800)
   ;; Ignore build directories for tagging
+  (add-to-list 'counsel-etags-ignore-directories "RedistSettings")
+  (add-to-list 'counsel-etags-ignore-directories "Midi")
+  (add-to-list 'counsel-etags-ignore-directories "Scripts")
+  (add-to-list 'counsel-etags-ignore-directories "WebApplications")
+  (add-to-list 'counsel-etags-ignore-directories "build")
+  (add-to-list 'counsel-etags-ignore-directories "redist")
+  ;; counsel-etags-ignore-filenames supports wildcast
+  (add-to-list 'counsel-etags-ignore-filenames "TAGS")
+  (add-to-list 'counsel-etags-ignore-filenames "*.json")
   (add-to-list 'counsel-etags-ignore-directories '"build*")
   (add-to-list 'counsel-etags-ignore-directories '".vscode")
   (add-to-list 'counsel-etags-ignore-filenames '".clang-format")
@@ -263,14 +310,14 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
   ;; Don't warn when TAGS files are large
   (setq large-file-warning-threshold nil)
   ;; How many seconds to wait before rerunning tags for auto-update
-  (setq counsel-etags-update-interval 180)
+  ;; (setq counsel-etags-update-interval 180)
   ;; Set up auto-update
-  (add-hook
-   'prog-mode-hook
-   (lambda () (add-hook 'after-save-hook
-                        (lambda ()
-                          (counsel-etags-virtual-update-tags))))
-   )
+  ;; (add-hook
+  ;;  'prog-mode-hook
+  ;;  (lambda () (add-hook 'after-save-hook
+  ;;                       (lambda ()
+  ;;                         (counsel-etags-virtual-update-tags))))
+  ;;  )
 
   ;; The function provided by counsel-etags is broken (at least on Linux)
   ;; and doesn't correctly exclude directories, leading to an excessive
@@ -278,72 +325,66 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
   ;; in e.g. '*dirname/*' causes 'find' to not correctly exclude all files
   ;; in that directory, only files in sub-directories of the dir set to be
   ;; ignore.
-  (defun my-scan-dir (src-dir &optional force)
-    "Create tags file from SRC-DIR. \
-     If FORCE is t, the commmand is executed without \
-     checking the timer."
-    (let* ((find-pg (or
-                     counsel-etags-find-program
-                     (counsel-etags-guess-program "find")))
-           (ctags-pg (or
-                      counsel-etags-tags-program
-                      (format "%s -e -L" (counsel-etags-guess-program
-                                          "ctags"))))
-           (default-directory src-dir)
-           ;; run find&ctags to create TAGS
-           (cmd (format
-                 "%s . \\( %s \\) -prune -o -type f -not -size +%sk %s | %s -"
-                 find-pg
-                 (mapconcat
-                  (lambda (p)
-                    (format "-iwholename \"*%s*\"" p))
-                  counsel-etags-ignore-directories " -or ")
-                 counsel-etags-max-file-size
-                 (mapconcat (lambda (n)
-                              (format "-not -name \"%s\"" n))
-                            counsel-etags-ignore-filenames " ")
-                 ctags-pg))
-           (tags-file (concat (file-name-as-directory src-dir) "TAGS"))
-           (doit (or force (not (file-exists-p tags-file)))))
-      ;; always update cli options
-      (when doit
-        (message "%s at %s" cmd default-directory)
-        (shell-command cmd)
-        (visit-tags-table tags-file t)
-        )
-      )
-    )
+  ;; (defun my-scan-dir (src-dir &optional force)
+  ;;   "Create tags file from SRC-DIR. \
+  ;;    If FORCE is t, the commmand is executed without \
+  ;;    checking the timer."
+  ;;   (let* ((find-pg (or
+  ;;                    counsel-etags-find-program
+  ;;                    (counsel-etags-guess-program "find")))
+  ;;          (ctags-pg (or
+  ;;                     counsel-etags-tags-program
+  ;;                     (format "%s -e -L" (counsel-etags-guess-program
+  ;;                                         "ctags"))))
+  ;;          (default-directory src-dir)
+  ;;          ;; run find&ctags to create TAGS
+  ;;          (cmd (format
+  ;;                "%s . \\( %s \\) -prune -o -type f -not -size +%sk %s | %s -"
+  ;;                find-pg
+  ;;                (mapconcat
+  ;;                 (lambda (p)
+  ;;                   (format "-iwholename \"*%s*\"" p))
+  ;;                 counsel-etags-ignore-directories " -or ")
+  ;;                counsel-etags-max-file-size
+  ;;                (mapconcat (lambda (n)
+  ;;                             (format "-not -name \"%s\"" n))
+  ;;                           counsel-etags-ignore-filenames " ")
+  ;;                ctags-pg))
+  ;;          (tags-file (concat (file-name-as-directory src-dir) "TAGS"))
+  ;;          (doit (or force (not (file-exists-p tags-file)))))
+  ;;     ;; always update cli options
+  ;;     (when doit
+  ;;       (message "%s at %s" cmd default-directory)
+  ;;       (shell-command cmd)
+  ;;       (visit-tags-table tags-file t)
+  ;;       )
+  ;;     )
+  ;;   )
 
-  (setq counsel-etags-update-tags-backend
-        (lambda ()
-          (interactive)
-          (let* ((tags-file (counsel-etags-locate-tags-file)))
-            (when tags-file
-              (my-scan-dir (file-name-directory tags-file) t)
-              (run-hook-with-args
-               'counsel-etags-after-update-tags-hook tags-file)
-              (unless counsel-etags-quiet-when-updating-tags
-                (message "%s is updated!" tags-file))))
-          )
-        )
-  )
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Set up code completion with company
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package company
-  :ensure t
-  :config
-  ;; Zero delay when pressing tab
-  (setq company-idle-delay 0)
-  (add-hook 'after-init-hook 'global-company-mode)
-  ;; remove unused backends
-  (setq company-backends (delete 'company-semantic company-backends))
-  (setq company-backends (delete 'company-eclim company-backends))
-  (setq company-backends (delete 'company-xcode company-backends))
-  (setq company-backends (delete 'company-clang company-backends))
-  (setq company-backends (delete 'company-bbdb company-backends))
-  (setq company-backends (delete 'company-oddmuse company-backends))
+  ;; (setq counsel-etags-update-tags-backend
+  ;;       (lambda ()
+  ;;         (interactive)
+  ;;         (let* ((tags-file (counsel-etags-locate-tags-file)))
+  ;;           (when tags-file
+  ;;             (my-scan-dir (file-name-directory tags-file) t)
+  ;;             (run-hook-with-args
+  ;;              'counsel-etags-after-update-tags-hook tags-file)
+  ;;             (unless counsel-etags-quiet-when-updating-tags
+  ;;               (message "%s is updated!" tags-file))))
+  ;;         )
+  ;;       )
+  ;; (eval-after-load 'counsel-etags
+  ;;   '(progn
+  ;;      ;; counsel-etags-ignore-directories does NOT support wildcast
+  ;;      (add-to-list 'counsel-etags-ignore-directories "RedistSettings")
+  ;;      (add-to-list 'counsel-etags-ignore-directories "Midi")
+  ;;      (add-to-list 'counsel-etags-ignore-directories "Scripts")
+  ;;      (add-to-list 'counsel-etags-ignore-directories "WebApplications")
+  ;;      (add-to-list 'counsel-etags-ignore-directories "build")
+  ;;      (add-to-list 'counsel-etags-ignore-directories "redist")
+  ;;      ;; counsel-etags-ignore-filenames supports wildcast
+  ;;      (add-to-list 'counsel-etags-ignore-filenames "TAGS")
+  ;;      (add-to-list 'counsel-etags-ignore-filenames "*.json")))
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -485,6 +526,61 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
 ;;   (powerline-right-theme)
 ;; )
 
+;; ;; helm from https://github.com/emacs-helm/helm
+;; (require 'helm)
+
+;; ;; Locate the helm-swoop folder to your path
+;; ;; (add-to-list 'load-path "~/.emacs.d/elisp/helm-swoop")
+;; (prelude-require-package 'helm-swoop)
+;; (require 'helm-swoop)
+
+;; ;; Change the keybinds to whatever you like :)
+;; (global-set-key (kbd "M-i") 'helm-swoop)
+;; (global-set-key (kbd "M-I") 'helm-swoop-back-to-last-point)
+;; (global-set-key (kbd "C-c M-i") 'helm-multi-swoop)
+;; (global-set-key (kbd "C-x M-i") 'helm-multi-swoop-all)
+
+;; ;; When doing isearch, hand the word over to helm-swoop
+;; (define-key isearch-mode-map (kbd "M-i") 'helm-swoop-from-isearch)
+;; ;; From helm-swoop to helm-multi-swoop-all
+;; (define-key helm-swoop-map (kbd "M-i") 'helm-multi-swoop-all-from-helm-swoop)
+;; ;; When doing evil-search, hand the word over to helm-swoop
+;; ;; (define-key evil-motion-state-map (kbd "M-i") 'helm-swoop-from-evil-search)
+
+;; ;; Instead of helm-multi-swoop-all, you can also use helm-multi-swoop-current-mode
+;; (define-key helm-swoop-map (kbd "M-m") 'helm-multi-swoop-current-mode-from-helm-swoop)
+
+;; ;; Move up and down like isearch
+;; (define-key helm-swoop-map (kbd "C-r") 'helm-previous-line)
+;; (define-key helm-swoop-map (kbd "C-s") 'helm-next-line)
+;; (define-key helm-multi-swoop-map (kbd "C-r") 'helm-previous-line)
+;; (define-key helm-multi-swoop-map (kbd "C-s") 'helm-next-line)
+
+;; ;; Save buffer when helm-multi-swoop-edit complete
+;; (setq helm-multi-swoop-edit-save t)
+
+;; ;; If this value is t, split window inside the current window
+;; (setq helm-swoop-split-with-multiple-windows nil)
+
+;; ;; Split direcion. 'split-window-vertically or 'split-window-horizontally
+;; (setq helm-swoop-split-direction 'split-window-vertically)
+
+;; ;; If nil, you can slightly boost invoke speed in exchange for text color
+;; (setq helm-swoop-speed-or-color nil)
+
+;; ;; ;; Go to the opposite side of line from the end or beginning of line
+;; (setq helm-swoop-move-to-line-cycle t)
+
+;; ;; Optional face for line numbers
+;; ;; Face name is `helm-swoop-line-number-face`
+;; (setq helm-swoop-use-line-number-face t)
+
+;; ;; If you prefer fuzzy matching
+;; (setq helm-swoop-use-fuzzy-match t)
+
+;; ;; If you would like to use migemo, enable helm's migemo feature
+;; (helm-migemo-mode 1)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -492,7 +588,7 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (flycheck-tip rainbow-delimiters flycheck-ycmd company-ycmd ycmd modern-cpp-font-lock clang-format vlf recentf-ext ein auto-package-update s use-package zop-to-char zenburn-theme which-key volatile-highlights undo-tree smartrep smartparens operate-on-number move-text magit projectile imenu-anywhere hl-todo guru-mode gitignore-mode gitconfig-mode git-timemachine gist flycheck expand-region epl editorconfig easy-kill diminish diff-hl discover-my-major crux browse-kill-ring beacon anzu ace-window))))
+    (helm-swoop flycheck-tip rainbow-delimiters flycheck-ycmd company-ycmd ycmd modern-cpp-font-lock clang-format vlf recentf-ext ein auto-package-update s use-package zop-to-char zenburn-theme which-key volatile-highlights undo-tree smartrep smartparens operate-on-number move-text magit projectile imenu-anywhere hl-todo guru-mode gitignore-mode gitconfig-mode git-timemachine gist flycheck expand-region epl editorconfig easy-kill diminish diff-hl discover-my-major crux browse-kill-ring beacon anzu ace-window))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
