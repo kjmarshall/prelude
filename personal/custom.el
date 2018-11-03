@@ -11,6 +11,12 @@
 (use-package s
   :ensure t )
 
+;; -------------------------- ;;
+;; disable whitespace cleanup ;;
+;; -------------------------- ;;
+(setq prelude-whitespace nil)
+(setq prelude-clean-whitespace-on-save nil)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; auto-package-update
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -163,7 +169,7 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
         (declare-function global-ycmd-mode "ycmd.el"))
       (add-hook 'after-init-hook #'global-ycmd-mode)
       :init
-      (setq company-idle-delay .5
+      (setq company-idle-delay 0.5
             company-echo-delay 0
             company-auto-complete nil
             company-require-match nil
@@ -581,6 +587,38 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
 ;; ;; If you would like to use migemo, enable helm's migemo feature
 ;; (helm-migemo-mode 1)
 
+;; -------------------- ;;
+;; insert date and time ;;
+;; -------------------- ;;
+
+(defvar current-date-time-format "%a %b %d %H:%M:%S %Z %Y"
+  "Format of date to insert with `insert-current-date-time' func
+See help of `format-time-string' for possible replacements")
+
+(defvar current-time-format "%a %H:%M:%S"
+  "Format of date to insert with `insert-current-time' func.
+Note the weekly scope of the command's precision.")
+
+(defun insert-current-date-time ()
+  "insert the current date and time into current buffer.
+Uses `current-date-time-format' for the formatting the date/time."
+       (interactive)
+       ;; (insert "==========\n")
+;       (insert (let () (comment-start)))
+       (insert (format-time-string current-date-time-format (current-time)))
+       (insert "\n")
+       )
+
+(defun insert-current-time ()
+  "insert the current time (1-week scope) into the current buffer."
+       (interactive)
+       (insert (format-time-string current-time-format (current-time)))
+       (insert "\n")
+       )
+
+(global-set-key "\C-c\C-d" 'insert-current-date-time)
+(global-set-key "\C-c\C-t" 'insert-current-time)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -588,10 +626,10 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (helm-swoop flycheck-tip rainbow-delimiters flycheck-ycmd company-ycmd ycmd modern-cpp-font-lock clang-format vlf recentf-ext ein auto-package-update s use-package zop-to-char zenburn-theme which-key volatile-highlights undo-tree smartrep smartparens operate-on-number move-text magit projectile imenu-anywhere hl-todo guru-mode gitignore-mode gitconfig-mode git-timemachine gist flycheck expand-region epl editorconfig easy-kill diminish diff-hl discover-my-major crux browse-kill-ring beacon anzu ace-window))))
+    (cmake-mode helm-swoop flycheck-tip rainbow-delimiters flycheck-ycmd company-ycmd ycmd modern-cpp-font-lock clang-format vlf recentf-ext ein auto-package-update s use-package zop-to-char zenburn-theme which-key volatile-highlights undo-tree smartrep smartparens operate-on-number move-text magit projectile imenu-anywhere hl-todo guru-mode gitignore-mode gitconfig-mode git-timemachine gist flycheck expand-region epl editorconfig easy-kill diminish diff-hl discover-my-major crux browse-kill-ring beacon anzu ace-window))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(highlight-symbol-face ((t (:background "red")))))

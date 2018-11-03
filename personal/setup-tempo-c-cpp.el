@@ -257,25 +257,25 @@
                        "Insert a seperator"
                        'c++-tempo-tags
                        )
-;; (tempo-define-template "c++-class"
-;; 		        '(>"/**" > n 
-;; 			  "*" (p "Enter Classname: " class) "."> n
-;; 			  "*/" > n
-;; 			  "class " (s class) " {" > n
-;; 			  "public: \t// public typedefs" n n
-;; 			  "private: \t// private typedefs" n n
-;; 			  "public: \t//public member functions" n
-;;               (s class) "();" n
-;; 			  (s class) "(const " (s class) " &c);" n
-;;               "~" (s class) "();" n n
-;; 			  "private: \t//private member functions" n n
-;; 			  "public: \t//public data members" n n
-;; 			  "private: \t//private data members" n n
-;; 			  "}; // end of class " (s class) n
-;; 			  )
-;; 			"class"
-;; 			"Insert a class skeleton"
-;; 			'c++-tempo-tags)
+(tempo-define-template "c++-class"
+		        '(>"/**" > n 
+			  "*" (p "Enter Classname: " class) "."> n
+			  "*/" > n
+			  "class " (s class) " {" > n
+			  "public: \t// public typedefs" n n
+			  "private: \t// private typedefs" n n
+			  "public: \t//public member functions" n
+              (s class) "();" n
+			  (s class) "(const " (s class) " &c);" n
+              "~" (s class) "();" n n
+			  "private: \t//private member functions" n n
+			  "public: \t//public data members" n n
+			  "private: \t//private data members" n n
+			  "}; // end of class " (s class) n
+			  )
+			"class"
+			"Insert a class skeleton"
+			'c++-tempo-tags)
 
 (tempo-define-template "c++-getset"
 		       '((p "type: "     type 'noinsert)

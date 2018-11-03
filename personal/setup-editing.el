@@ -15,7 +15,7 @@
 (show-paren-mode 1)                  ;; Always attempt to show matching parentheses
 (setq show-paren-delay 0) ;; no delay
 (set-face-background 'show-paren-match (face-background 'default))
-(set-face-foreground 'show-paren-match "#ff00ff")
+(set-face-foreground 'show-paren-match "#ff0000")
 (set-face-attribute 'show-paren-match nil :weight 'extra-bold)
 
 (global-hl-line-mode)                ;; Always highlight the current line
@@ -291,6 +291,9 @@ line instead."
 (prelude-require-package 'volatile-highlights)
 (require 'volatile-highlights)
 (volatile-highlights-mode t)
+
+(prelude-require-package 'highlight-symbol)
+(require 'highlight-symbol)
 
 ;; -------------------- ;;
 ;; Package: smartparens ;;
