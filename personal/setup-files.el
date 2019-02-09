@@ -115,5 +115,10 @@
 ;; ------------------- ;;
 (prelude-require-package 'vlf)
 (require 'vlf)
-(setq vlf-application 'dont-ask) ;; automatically use vlf on large file,
-                                 ;; when the file exceed large-file-warning-threshold
+(use-package vlf
+  :ensure t
+  :init
+  ;; automatically use vlf on large file,
+  ;; when the file exceed large-file-warning-threshold
+  (setq vlf-application 'dont-ask)
+  )

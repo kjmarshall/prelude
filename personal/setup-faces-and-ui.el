@@ -32,39 +32,42 @@
 (set-face-attribute 'italic nil
                     :family "Dejavu Sans Mono-Italic")
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; PACKAGE: highlight-numbers         ;;
-;;                                    ;;
-;; GROUP: Faces -> Number Font Lock   ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -------------------------------- ;;
+;; PACKAGE: highlight-numbers       ;;
+;;                                  ;;
+;; GROUP: Faces -> Number Font Lock ;;
+;; -------------------------------- ;;
 (prelude-require-package 'highlight-numbers)
 (require 'highlight-numbers)
-(add-hook 'prog-mode-hook 'highlight-numbers-mode)
+(use-package highlight-numbers
+  :ensure t
+  :hook ( prog-mode . highlight-numbers-mode )
+  )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; PACKAGE: highlight-symbol          ;;
-;;                                    ;;
-;; GROUP:                             ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ------------------------- ;;
+;; PACKAGE: highlight-symbol ;;
+;;                           ;;
+;; GROUP:                    ;;
+;; ------------------------- ;;
 (prelude-require-package 'highlight-symbol)
 (require 'highlight-symbol)
-
-(highlight-symbol-nav-mode)
-
-(add-hook 'prog-mode-hook (lambda () (highlight-symbol-mode)))
-(add-hook 'org-mode-hook (lambda () (highlight-symbol-mode)))
-
-(setq highlight-symbol-idle-delay 0.2
-      highlight-symbol-on-navigation-p t)
-
-(global-set-key [(control shift mouse-1)]
-                (lambda (event)
-                  (interactive "e")
-                  (goto-char (posn-point (event-start event)))
-                  (highlight-symbol-at-point)))
-
-(global-set-key (kbd "M-n") 'highlight-symbol-next)
-(global-set-key (kbd "M-p") 'highlight-symbol-prev)
+(use-package highlight-symbol
+  :ensure t
+  :init
+  (setq highlight-symbol-idle-delay 0.2
+        highlight-symbol-on-navigation-p t)
+  :hook (( prog-mode . highlight-symbol-mode)
+         ( org-mode . highlight-symbol-mode ))
+  :bind (([(control shift mouse-1)] .
+          (lambda (event)
+            (interactive "e")
+            (goto-char (posn-point (event-start event)))
+            (highlight-symbol-at-point)))
+         ("M-n" . highlight-symbol-next)
+         ("M-p" . highlight-symbol-prev) )
+  :config
+  (highlight-symbol-nav-mode)
+  )
 
 ;; ------------------------------ ;;
 ;; PACKAGE: color-theme-solarized ;;

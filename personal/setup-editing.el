@@ -1,9 +1,3 @@
-;; (provide 'setup-editing)
-
-;; (global-set-key (kbd "RET") 'newline-and-indent)  ; automatically indent when press RET
-
-;; ;;(aggressive-indent-global-mode)      ;; Enable aggressive indent mode everywhere
-
 (provide 'setup-editing)
 (global-set-key (kbd "<return>") (kbd "RET"))
 
@@ -12,11 +6,16 @@
 ;; -------------------------- ;;
 (prelude-require-package 'paren)
 (require 'paren)
-(show-paren-mode 1)                  ;; Always attempt to show matching parentheses
-(setq show-paren-delay 0) ;; no delay
-(set-face-background 'show-paren-match (face-background 'default))
-(set-face-foreground 'show-paren-match "#ff0000")
-(set-face-attribute 'show-paren-match nil :weight 'extra-bold)
+(use-package paren
+  :ensure t
+  :init
+  (setq show-paren-mode 1)
+  (setq show-paren-delay 0) ;; no delay
+  (set-face-background 'show-paren-match (face-background 'default))
+  (set-face-foreground 'show-paren-match "#ff0000")
+  (set-face-attribute 'show-paren-match nil :weight 'extra-bold)
+  :config
+  )
 
 (global-hl-line-mode)                ;; Always highlight the current line
 (setq-default fci-rule-column 80)    ;; Show column ruler at 80 columns
@@ -281,7 +280,10 @@ line instead."
 ;; -------------------------------------- ;;
 (prelude-require-package 'duplicate-thing)
 (require 'duplicate-thing)
-(global-set-key (kbd "M-c") 'duplicate-thing)
+(use-package duplicate-thing
+  :ensure t
+  :bind (("M-c" . duplicate-thing))
+  )
 
 ;; ------------------------------------- ;;
 ;; Package: volatile-highlights          ;;
@@ -290,21 +292,35 @@ line instead."
 ;; ------------------------------------- ;;
 (prelude-require-package 'volatile-highlights)
 (require 'volatile-highlights)
-(volatile-highlights-mode t)
+(use-package volatile-highlights
+  :ensure t
+  :init
+  (setq volatile-highlights-mode t)
+  )
 
+;; ------------------------- ;;
+;; PACKAGE: highlight-symbol ;;
+;; ------------------------- ;;
 (prelude-require-package 'highlight-symbol)
 (require 'highlight-symbol)
+(use-package highlight-symbol
+  :ensure t
+  )
 
 ;; -------------------- ;;
 ;; Package: smartparens ;;
 ;; -------------------- ;;
 (prelude-require-package 'smartparens)
-(require 'smartparens-config)
-(setq sp-base-key-bindings 'paredit)
-(setq sp-autoskip-closing-pair 'always)
-(setq sp-hybrid-kill-entire-symbol nil)
-(sp-use-paredit-bindings)
-(smartparens-global-mode t)
+(require 'smartparens)
+(use-package smartparens
+  :ensure t
+  :init
+  (setq sp-base-key-bindings 'paredit)
+  (setq sp-autoskip-closing-pair 'always)
+  (setq sp-hybrid-kill-entire-symbol nil)
+  (sp-use-paredit-bindings)
+  (setq smartparens-global-mode t)
+  )
 
 ;; ----------------------------------------- ;;
 ;; Package: clean-aindent-mode               ;;
@@ -313,21 +329,31 @@ line instead."
 ;; ----------------------------------------- ;;
 (prelude-require-package 'clean-aindent-mode)
 (require 'clean-aindent-mode)
-(add-hook 'prog-mode-hook 'clean-aindent-mode)
+(use-package clean-aindent-mode
+  :ensure t
+  :hook ((prog-mode . clean-aindent-mode))
+  )
 
 ;; -------------------- ;;
 ;; Package: dtrt-indent ;;
 ;; -------------------- ;;
 (prelude-require-package 'dtrt-indent)
 (require 'dtrt-indent)
-(dtrt-indent-mode 1)
+(use-package dtrt-indent
+  :ensure t
+  :init
+  (setq dtrt-indent-mode 1)
+  )
 
 ;; ------------------ ;;
 ;; Package: ws-butler ;;
 ;; ------------------ ;;
 (prelude-require-package 'ws-butler)
 (require 'ws-butler)
-(add-hook 'c-mode-common-hook 'ws-butler-mode)
+(use-package ws-butler
+  :ensure t
+  :hook ((c-mode-common . ws-butler-mode))
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Package: undo-tree                  ;;
@@ -337,6 +363,7 @@ line instead."
 (prelude-require-package 'undo-tree)
 (require 'undo-tree)
 (use-package undo-tree
+  :ensure t
   :config
   (progn
     (defun modi/undo-tree-enable-save-history ()
@@ -370,37 +397,5 @@ line instead."
 
     (modi/undo-tree-disable-save-history)
 
-    (global-undo-tree-mode 1)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Package: yasnippet                 ;;
-;;                                    ;;
-;; GROUP: Editing -> Yasnippet        ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(prelude-require-package 'yasnippet)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Package: yasnippet
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(use-package yasnippet
-  :ensure t
-  :commands (yas-reload-all)
-  :init
-  (eval-when-compile
-    ;; Silence missing function warnings
-    (declare-function yas-global-mode "yasnippet.el"))
-  :defer 5
-  :config
-  (yas-global-mode t)
-  (yas-reload-all))
-(use-package yasnippet-snippets
-  :ensure t
-  :after yasnippet
-  :config
-  (yas-reload-all))
-;; Apparently the company-yasnippet backend shadows all backends that
-;; come after it. To work around this we assign yasnippet to a different
-;; keybind since actual source completion is vital.
-(use-package company-yasnippet
-  :bind ("C-M-y" . company-yasnippet)
-  :after (yasnippet)
+    (global-undo-tree-mode 1))
   )

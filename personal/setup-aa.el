@@ -9,17 +9,33 @@
 ;; ---------- ;;
 (prelude-require-package 's)
 (use-package s
-  :ensure t )
+  :ensure t
+  )
 
-;; -------------------------- ;;
-;; disable whitespace cleanup ;;
-;; -------------------------- ;;
+;; ------------------------------------- ;;
+;; GROUP: Applications -> c mode editing ;;
+;; ------------------------------------- ;;
+(prelude-require-package 'cl);
+(require 'cl)
+(use-package cl
+  :ensure t
+  )
+(prelude-require-package 'cc-mode)
+(require 'cc-mode)
+(use-package cc-mode
+  :ensure t
+  )
+
+;; ---------------- ;;
+;; PACKAGE: Prelude ;;
+;; ---------------- ;;
+;; modifications to disable whitespace cleanup
 (setq prelude-whitespace nil)
 (setq prelude-clean-whitespace-on-save nil)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; auto-package-update
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ---------------------------- ;;
+;; PACKAGE: auto-package-update ;;
+;; ---------------------------- ;;
 ;; Auto update packages once a week
 (prelude-require-package 'auto-package-update)
 (use-package auto-package-update
@@ -38,16 +54,35 @@
 ;; ------------------------------------- ;;
 (prelude-require-package 'ein)
 (require 'ein)
+(use-package ein
+  :ensure t
+  )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ---------------- ;;
+;; PACKAGE: Company ;;
+;; ---------------- ;;
 ;; Set up code completion with company
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(prelude-require-package 'company)
+(require 'company)
 (use-package company
   :ensure t
+  :init
+  (setq company-idle-delay 0.5)
+  (setq company-show-numbers t)
+  (setq company-tooltip-limit 10)
+  (setq company-minimum-prefix-length 2)
+  (setq company-tooltip-align-annotations t)
+  (define-key c-mode-map [C-(tab)] 'company-complete)
+  (define-key c++-mode-map [C-(tab)] 'company-complete)
+  ;; invert the navigation direction if the the completion popup-isearch-match
+  ;; is displayed on top (happens near the bottom of windows)
+  (setq company-tooltip-flip-when-above t)
+
+  (global-company-mode 1)
+  :hook ( after-init . global-company-mode )
   :config
   ;; Zero delay when pressing tab
   ;; (setq company-idle-delay 0)
-  (add-hook 'after-init-hook 'global-company-mode)
   ;; remove unused backends
   (setq company-backends (delete 'company-semantic company-backends))
   (setq company-backends (delete 'company-eclim company-backends))
@@ -55,15 +90,124 @@
   (setq company-backends (delete 'company-clang company-backends))
   (setq company-backends (delete 'company-bbdb company-backends))
   (setq company-backends (delete 'company-oddmuse company-backends))
+  ;; (setf company-backends '())
+  (add-to-list 'company-backends 'company-keywords)
+  (add-to-list 'company-backends 'company-yasnippet)
+  (add-to-list 'company-backends 'company-dabbrev-code)
+  (add-to-list 'company-backends 'company-files)
+  (add-to-list 'company-backends 'company-dabbrev)
+  (setq company-transformers '(company-sort-by-backend-importance))
+  :bind ("C-;" . company-complete-common)
   )
+
+
+;; ;; ---------------------- ;;
+;; ;; PACKAGE: company-irony ;;
+;; ;; ---------------------- ;;
+;; (use-package company-irony
+;;   :ensure t
+;;   :init
+;;   (add-to-list 'company-backends 'company-irony)
+;;   (setq company-backends (delete 'company-semantic company-backends))
+;;   :after (company)
+;;   )
+
+;; ;; -------------------------------- ;;
+;; ;; PACKAGE: company-irony-c-headers ;;
+;; ;; -------------------------------- ;;
+;; (use-package company-irony-c-headers
+;;   :ensure t
+;;   :init
+;;   (add-to-list 'company-backends 'company-irony-c-headers)
+;;   :after (company)
+;;   )
+
+;; --------------------------- ;;
+;; Package: yasnippet          ;;
+;;                             ;;
+;; GROUP: Editing -> Yasnippet ;;
+;; --------------------------- ;;
+(prelude-require-package 'yasnippet)
+(use-package yasnippet
+  :ensure t
+  :commands (yas-reload-all)
+  :init
+  (eval-when-compile
+    ;; Silence missing function warnings
+    (declare-function yas-global-mode "yasnippet.el"))
+  :defer 5
+  :config
+  (yas-global-mode t)
+  (yas-reload-all)
+  )
+(use-package yasnippet-snippets
+  :ensure t
+  :config
+  (yas-reload-all)
+  :after (yasnippet)
+  )
+
+;; Apparently the company-yasnippet backend shadows all backends that
+;; come after it. To work around this we assign yasnippet to a different
+;; keybind since actual source completion is vital.
+;; (use-package company-yasnippet
+;;   :ensure t
+;;   :bind ("C-M-y" . company-yasnippet)
+;;   :after (company yasnippet)
+;;   )
+
+;; -------------- ;;
+;; PACKAGE: Irony ;;
+;; -------------- ;;
+;; Use irony for completion
+;; (use-package irony
+;;   :ensure t
+;;   :defer t
+;;   :init
+;;   (add-hook 'c++-mode-hook 'irony-mode)
+;;   (add-hook 'c-mode-hook 'irony-mode)
+;;   (add-hook 'objc-mode-hook 'irony-mode)
+;;   :config
+;;   ;; replace the `completion-at-point' and `complete-symbol' bindings in
+;;   ;; irony-mode's buffers by irony-mode's function
+;;   (defun my-irony-mode-hook ()
+;;     (define-key irony-mode-map [remap completion-at-point]
+;;       'irony-completion-at-point-async)
+;;     (define-key irony-mode-map [remap complete-symbol]
+;;       'irony-completion-at-point-async))
+;;   (add-hook 'irony-mode-hook 'my-irony-mode-hook)
+;;   (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
+;;   )
+
+;; ---------------- ;;
+;; PACKAGE: Malinka ;;
+;; ---------------- ;;
+;; (prelude-require-package 'malinka)
+;; (require 'malinka)
+;; (use-package malinka
+;;   :ensure t
+;;   :hook ((c-mode-common . malinka-mode))
+;;   )
+;; (malinka-define-project
+;;  :name "ImagingTools"
+;;  :root-directory "/nfs/orto/proj/tapeout/cit_dev26/kmarshal/ImagingTools"
+;;  :build-directory "/nfs/orto/proj/tapeout/cit_dev26/kmarshal/ImagingTools"
+;;  :configure-cmd "cmake . -DCMAKE_BUILD_TYPE=Debug -DHEADLESS=1"
+;;  :compile-cmd "gmake cc=gcc type=release ext=none -sj24 redist"
+;;  :test-cmd "" )
 
 ;; -------------------------------------------- ;;
 ;; PACKAGE: projectile additional configuration ;;
 ;; -------------------------------------------- ;;
+(prelude-require-package 'projectile)
 (require 'projectile)
-;; (define-key projectile-mode-map projectile-keymap-prefix nil)
-(define-key projectile-mode-map (kbd "C-c p") #'projectile-command-map)
-(setq projectile-enable-caching t)
+(use-package projectile
+  :ensure t
+  :bind-keymap
+  ("C-c p" . projectile-command-map)
+  :config
+  (setq projectile-enable-caching t)
+  )
 
 ;; --------------------------------------------------------------- ;;
 ;; Rainbow Delimiters -  have delimiters be colored by their depth ;;
@@ -76,7 +220,8 @@
   (eval-when-compile
     ;; Silence missing function warnings
     (declare-function rainbow-delimiters-mode "rainbow-delimiters.el"))
-  (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
+  (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
+  )
 
 ;; ----------------------------------------------------------------- ;;
 ;; Beacon-mode: flash the cursor when switching buffers or scrolling ;;
@@ -91,7 +236,8 @@
     ;; Silence missing function warnings
     (declare-function beacon-mode "beacon.el"))
   :config
-  (beacon-mode t))
+  (beacon-mode t)
+  )
 
 ;; ------------------------------------------------------------ ;;
 ;; which-key: when you pause on a keyboard shortcut it provides ;;
@@ -106,7 +252,8 @@
     ;; Silence missing function warnings
     (declare-function which-key-mode "which-key.el"))
   :config
-  (which-key-mode))
+  (which-key-mode)
+  )
 
 ;; ---------------- ;;
 ;; CLANG formatting ;;
@@ -116,33 +263,41 @@
 ;; clang-format -style=google -dump-config > .clang-format
 (prelude-require-package 'clang-format)
 (require 'clang-format)
-(global-set-key (kbd "C-c C-f") 'clang-format-region)
+(use-package clang-format
+  :ensure t
+  :bind (("C-c C-f" . clang-format-region))
+  )
 
 ;; ----------------------------- ;;
 ;; PACKAGE: modern-cpp-font-lock ;;
 ;; ----------------------------- ;;
 (prelude-require-package 'modern-cpp-font-lock)
 (require 'modern-cpp-font-lock)
-(modern-c++-font-lock-global-mode t)
+(use-package modern-cpp-font-lock
+  :ensure t
+  :init
+  (setq modern-c++-font-lock-global-mode t)
+  )
 
 ;; ----------------------------- ;;
 ;; PACKAGE: ycmd code completion ;;
 ;; ----------------------------- ;;
 ;; Specify the ycmd server command and path to the ycmd directory *inside* the
 ;; cloned ycmd directory
-;; recall list syntax where backquote evaluates elemnts of a list
+;; recall list syntax where backquote evaluates elements of a list
 ;; and , tells that the list element is not constant
 (prelude-require-package 'ycmd)
 (require 'ycmd)
 (prelude-require-package 'company-ycmd)
-(require 'ycmd)
+(require 'company-ycmd)
 (prelude-require-package 'flycheck-ycmd)
 (require 'flycheck-ycmd)
 (defvar my:ycmd-server-command `("/nfs/pdx/home/kmarshal/km-nfs/python-3.7.0/bin/python3" ,(file-truename "~/.emacs.d/external/ycmd/ycmd/")))
-(defvar my:ycmd-extra-conf-whitelist `( ,(file-truename "~/.emacs.d/ycm_global_extra_conf.py") ) )
+(defvar my:ycmd-extra-conf-whitelist `( ,(file-truename "~/.emacs.d/ycm_configs/*")
+                                        ,(file-truename "~/km-nfs/ImagingTools/.ycm_extra_conf.py") ) )
 (defvar my:ycmd-global-config (file-truename "~/.emacs.d/ycm_global_extra_conf.py") )
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Package: ycmd (YouCompleteMeDaemon)
+;; package: ycmd (YouCompleteMeDaemon)
 ;; https://gist.github.com/nilsdeppe/7645c096d93b005458d97d6874a91ea9
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Set up YouCompleteMe for emacs:
@@ -168,26 +323,6 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
         ;; Silence missing function warnings
         (declare-function global-ycmd-mode "ycmd.el"))
       (add-hook 'after-init-hook #'global-ycmd-mode)
-      :init
-      (setq company-idle-delay 0.5
-            company-echo-delay 0
-            company-auto-complete nil
-            company-require-match nil
-            company-minimum-prefix-length 2
-            company-show-numbers t
-            company-selection-wrap-around t
-            company-tooltip-align-annotations t
-            company-tooltip-minimum-width 50
-            company-frontends '(company-pseudo-tooltip-frontend)
-            company-backends '((company-capf
-                                company-yasnippet
-                                company-dabbrev-code
-                                company-files
-                                company-gtags
-                                company-etags
-                                company-keywords)
-                               company-dabbrev)
-            company-transformers '(company-sort-by-backend-importance))
       :config
       (progn
         (set-variable 'ycmd-server-command my:ycmd-server-command)
@@ -266,6 +401,11 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
 ;; ----------------- ;;
 (prelude-require-package 'ess-view)
 (require 'ess-view)
+(use-package ess-view
+  :ensure t
+  :init
+  :config
+  )
 
 ;; -------------- ;;
 ;; PACKAGE: eldoc ;;
@@ -274,7 +414,8 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
 (require 'eldoc)
 (use-package eldoc
   :diminish eldoc-mode
-  :init (add-hook 'ycmd-mode-hook 'ycmd-eldoc-setup))
+  :init (add-hook 'ycmd-mode-hook 'ycmd-eldoc-setup)
+  )
 
 ;; ---------------------- ;;
 ;; PACKAGE: counsel-etags ;;
@@ -291,8 +432,7 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
     (declare-function counsel-etags-virtual-update-tags "counsel-etags.el")
     (declare-function counsel-etags-guess-program "counsel-etags.el")
     (declare-function counsel-etags-locate-tags-file "counsel-etags.el"))
-  :bind (
-         ("M-." . counsel-etags-find-tag-at-point)
+  :bind (("M-." . counsel-etags-find-tag-at-point)
          ("M-t" . counsel-etags-grep-symbol-at-point)
          ("M-s" . counsel-etags-find-tag))
   :config
@@ -393,10 +533,9 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
   ;;      (add-to-list 'counsel-etags-ignore-filenames "*.json")))
   )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Configure flycheck
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Note: For C++ we use flycheck-ycmd
+;; ------------------ ;;
+;; PACKAGE: flycheck ;;
+;; ------------------ ;;
 (prelude-require-package 'flycheck)
 (use-package flycheck
   :ensure t
@@ -414,16 +553,25 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
   (when (not (display-graphic-p))
     (setq flycheck-indication-mode nil))
   )
+;; (use-package flycheck-irony
+;;   :ensure t
+;;   :commands flycheck-irony-setup
+;;   :init
+;;   (add-hook 'c++-mode-hook 'flycheck-irony-setup)
+;;   (add-hook 'c-mode-hook 'flycheck-irony-setup)
+;;   )
+
 (prelude-require-package 'flycheck-pyflakes)
 (use-package flycheck-pyflakes
   :ensure t
-  :after python)
+  :after python
+  )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; string-inflection
-;; used for switching between different cases, eg CamelCase,
-;; lowerCamelCase, snake_case, and SCREAMING_SNAKE_CASE
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; --------------------------------------------------------- ;;
+;; PACKAGE: string-inflection                                         ;;
+;; used for switching between different cases, eg CamelCase, ;;
+;; lowerCamelCase, snake_case, and SCREAMING_SNAKE_CASE      ;;
+;; --------------------------------------------------------- ;;
 (prelude-require-package 'string-inflection)
 (use-package string-inflection
   :ensure t
@@ -434,7 +582,7 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
          ("C-c c s" . string-inflection-underscore)
          ("C-c c u" . string-inflection-upcase)
          )
-)
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; web-mode
@@ -450,147 +598,33 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
          ("\\.mustache\\'" . web-mode)
          ("\\.djhtml\\'" . web-mode)
          ("\\.html?\\'" . web-mode))
-)
+  )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ---------------------- ;;
+;; PACKAGE: markdown-mode ;;
+;; ---------------------- ;;
 ;; Use markdown-mode for markdown files
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (prelude-require-package 'markdown-mode)
 (use-package markdown-mode
   :ensure t
-  :mode (".md" ".markdown"))
+  :mode (".md" ".markdown")
+  )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ------------------ ;;
+;; PACKAGE: cuda-mode ;;
+;; ------------------ ;;
 ;; Syntax Highlighting in CUDA
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Load CUDA mode so we get syntax highlighting in .cu files
 (prelude-require-package 'cuda-mode)
 (use-package cuda-mode
   :ensure t
   :mode (("\\.cu\\'" . cuda-mode)
-         ("\\.cuh\\'" . cuda-mode)))
-
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ;; Powerline theme
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ;; powerline theme where the modes are on the right side.
-;; (prelude-require-package 'powerline)
-;; (use-package powerline
-;;   :ensure t
-;;   :config
-;;   (defun powerline-right-theme ()
-;;     "Setup a mode-line with major and minor modes on the right side."
-;;     (interactive)
-;;     (setq-default mode-line-format
-;;                   '("%e"
-;;                     (:eval
-;;                      (let* ((active (powerline-selected-window-active))
-;;                             (mode-line-buffer-id (if active 'mode-line-buffer-id 'mode-line-buffer-id-inactive))
-;;                             (mode-line (if active 'mode-line 'mode-line-inactive))
-;;                             (face0 (if active 'powerline-active0 'powerline-inactive0))
-;;                             (face1 (if active 'powerline-active1 'powerline-inactive1))
-;;                             (face2 (if active 'powerline-active2 'powerline-inactive2))
-;;                             (separator-left (intern (format "powerline-%s-%s"
-;;                                                             (powerline-current-separator)
-;;                                                             (car powerline-default-separator-dir))))
-;;                             (separator-right (intern (format "powerline-%s-%s"
-;;                                                              (powerline-current-separator)
-;;                                                              (cdr powerline-default-separator-dir))))
-;;                             (lhs (list (powerline-raw "%*" face0 'l)
-;;                                        (powerline-buffer-size face0 'l)
-;;                                        (powerline-buffer-id `(mode-line-buffer-id ,face0) 'l)
-;;                                        (powerline-raw " ")
-;;                                        (funcall separator-left face0 face1)
-;;                                        (powerline-narrow face1 'l)
-;;                                        (powerline-vc face1)))
-;;                             (center (list (powerline-raw global-mode-string face1 'r)
-;;                                           (powerline-raw "%4l" face1 'r)
-;;                                           (powerline-raw ":" face1)
-;;                                           (powerline-raw "%3c" face1 'r)
-;;                                           (funcall separator-right face1 face0)
-;;                                           (powerline-raw " ")
-;;                                           (powerline-raw "%6p" face0 'r)
-;;                                           (powerline-hud face2 face1)
-;;                                           ))
-;;                             (rhs (list (powerline-raw " " face1)
-;;                                        (funcall separator-left face1 face2)
-;;                                        (when (and (boundp 'erc-track-minor-mode) erc-track-minor-mode)
-;;                                          (powerline-raw erc-modified-channels-object face2 'l))
-;;                                        (powerline-major-mode face2 'l)
-;;                                        (powerline-process face2)
-;;                                        (powerline-raw " :" face2)
-;;                                        (powerline-minor-modes face2 'l)
-;;                                        (powerline-raw " " face2)
-;;                                        (funcall separator-right face2 face1)
-;;                                        ))
-;;                             )
-;;                        (concat (powerline-render lhs)
-;;                                (powerline-fill-center face1 (/ (powerline-width center) 2.0))
-;;                                (powerline-render center)
-;;                                (powerline-fill face1 (powerline-width rhs))
-;;                                (powerline-render rhs)))))))
-;;   (powerline-right-theme)
-;; )
-
-;; ;; helm from https://github.com/emacs-helm/helm
-;; (require 'helm)
-
-;; ;; Locate the helm-swoop folder to your path
-;; ;; (add-to-list 'load-path "~/.emacs.d/elisp/helm-swoop")
-;; (prelude-require-package 'helm-swoop)
-;; (require 'helm-swoop)
-
-;; ;; Change the keybinds to whatever you like :)
-;; (global-set-key (kbd "M-i") 'helm-swoop)
-;; (global-set-key (kbd "M-I") 'helm-swoop-back-to-last-point)
-;; (global-set-key (kbd "C-c M-i") 'helm-multi-swoop)
-;; (global-set-key (kbd "C-x M-i") 'helm-multi-swoop-all)
-
-;; ;; When doing isearch, hand the word over to helm-swoop
-;; (define-key isearch-mode-map (kbd "M-i") 'helm-swoop-from-isearch)
-;; ;; From helm-swoop to helm-multi-swoop-all
-;; (define-key helm-swoop-map (kbd "M-i") 'helm-multi-swoop-all-from-helm-swoop)
-;; ;; When doing evil-search, hand the word over to helm-swoop
-;; ;; (define-key evil-motion-state-map (kbd "M-i") 'helm-swoop-from-evil-search)
-
-;; ;; Instead of helm-multi-swoop-all, you can also use helm-multi-swoop-current-mode
-;; (define-key helm-swoop-map (kbd "M-m") 'helm-multi-swoop-current-mode-from-helm-swoop)
-
-;; ;; Move up and down like isearch
-;; (define-key helm-swoop-map (kbd "C-r") 'helm-previous-line)
-;; (define-key helm-swoop-map (kbd "C-s") 'helm-next-line)
-;; (define-key helm-multi-swoop-map (kbd "C-r") 'helm-previous-line)
-;; (define-key helm-multi-swoop-map (kbd "C-s") 'helm-next-line)
-
-;; ;; Save buffer when helm-multi-swoop-edit complete
-;; (setq helm-multi-swoop-edit-save t)
-
-;; ;; If this value is t, split window inside the current window
-;; (setq helm-swoop-split-with-multiple-windows nil)
-
-;; ;; Split direcion. 'split-window-vertically or 'split-window-horizontally
-;; (setq helm-swoop-split-direction 'split-window-vertically)
-
-;; ;; If nil, you can slightly boost invoke speed in exchange for text color
-;; (setq helm-swoop-speed-or-color nil)
-
-;; ;; ;; Go to the opposite side of line from the end or beginning of line
-;; (setq helm-swoop-move-to-line-cycle t)
-
-;; ;; Optional face for line numbers
-;; ;; Face name is `helm-swoop-line-number-face`
-;; (setq helm-swoop-use-line-number-face t)
-
-;; ;; If you prefer fuzzy matching
-;; (setq helm-swoop-use-fuzzy-match t)
-
-;; ;; If you would like to use migemo, enable helm's migemo feature
-;; (helm-migemo-mode 1)
+         ("\\.cuh\\'" . cuda-mode))
+  )
 
 ;; -------------------- ;;
 ;; insert date and time ;;
 ;; -------------------- ;;
-
 (defvar current-date-time-format "%a %b %d %H:%M:%S %Z %Y"
   "Format of date to insert with `insert-current-date-time' func
 See help of `format-time-string' for possible replacements")
@@ -618,18 +652,3 @@ Uses `current-date-time-format' for the formatting the date/time."
 
 (global-set-key "\C-c\C-d" 'insert-current-date-time)
 (global-set-key "\C-c\C-t" 'insert-current-time)
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   (quote
-    (helm-swoop flycheck-tip rainbow-delimiters flycheck-ycmd company-ycmd ycmd modern-cpp-font-lock clang-format vlf recentf-ext ein auto-package-update s use-package zop-to-char zenburn-theme which-key volatile-highlights undo-tree smartrep smartparens operate-on-number move-text magit projectile imenu-anywhere hl-todo guru-mode gitignore-mode gitconfig-mode git-timemachine gist flycheck expand-region epl editorconfig easy-kill diminish diff-hl discover-my-major crux browse-kill-ring beacon anzu ace-window))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(highlight-symbol-face ((t (:background "red")))))

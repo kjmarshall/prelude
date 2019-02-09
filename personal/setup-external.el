@@ -82,4 +82,7 @@
 ;; -------------------------------------- ;;
 (prelude-require-package 'shell-pop)
 (require 'shell-pop)
-(global-set-key (kbd "C-c t") 'shell-pop)
+(use-package shell-pop
+  :ensure t
+  :bind (("C-c t" . shell-pop))
+  )

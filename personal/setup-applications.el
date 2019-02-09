@@ -1,13 +1,5 @@
 (provide 'setup-applications)
 
-;; ------------------------------------- ;;
-;; GROUP: Applications -> c mode editing ;;
-;; ------------------------------------- ;;
-(prelude-require-package 'cl);
-(require 'cl)
-(prelude-require-package 'cc-mode)
-(require 'cc-mode)
-
 ;; ---------------------------- ;;
 ;; GROUP: Applications-> Eshell ;;
 ;; ---------------------------- ;;

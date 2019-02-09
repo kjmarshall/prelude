@@ -1,6 +1,8 @@
 (provide 'setup-convenience)
 
-;; GROUP: Convenience -> Revert
+;; ---------------------------- ;;
+;; GROUP: Convenience -> Revert ;;
+;; ---------------------------- ;;
 
 ;; update any change made on file to the current buffer
 (global-auto-revert-mode)
@@ -64,7 +66,10 @@
 ;; -------------------------------------------- ;;
 (prelude-require-package 'expand-region)
 (require 'expand-region)
-(global-set-key (kbd "M-m") 'er/expand-region)
+(use-package expand-region
+  :ensure t
+  :bind (("M-m" . er/expand-region))
+  )
 
 ;; ------------------- ;;
 ;; PACKAGE: ibuffer-vc ;;
@@ -88,39 +93,56 @@
               " "
               filename-and-process)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ---------------------------------------------------------------- ;;
 ;;  PACKAGE: rebox2                                                 ;;
 ;;  GROUP: Convenience -> boxing regions 10 = simple, 20 = rounded, ;;
 ;;  30 or 40 = starred                                              ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ---------------------------------------------------------------- ;;
 (prelude-require-package 'rebox2)
 (require 'rebox2)
-;; (setq rebox-style-loop '(13 15 23 25 33 35 43 45))
-(setq rebox-style-loop '(21 23 31 33 41 43))
-(global-set-key [(meta q)] 'rebox-dwim)
-(global-set-key [(shift meta q)] 'rebox-cycle)
+(use-package rebox2
+  :ensure t
+  :commands (rebox-dwim rebox-cycle)
+  :init
+  :config
+  (bind-key [(meta q)] 'rebox-dwim)
+  (bind-key [(shift meta q)] 'rebox-cycle)
+  (setq rebox-style-loop '(21 23 31 33 41 43))
+  ;; (setq rebox-style-loop '(13 15 23 25 33 35 43 45))
+  )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; PACKAGE: workgroups2               ;;
-;;                                    ;;
-;; GROUP: Convenience -> Workgroups   ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -------------------------------- ;;
+;; PACKAGE: workgroups2             ;;
+;;                                  ;;
+;; GROUP: Convenience -> Workgroups ;;
+;; -------------------------------- ;;
 ;; (prelude-require-package 'workgroups2)
 ;; (require 'workgroups2)
-;; Change some settings
-;; (workgroups-mode 1)
+;; (use-package workgroups2
+;;   :init
+;;   (setq workgroups-mode 1)
+;;   )
 
 ;; ---------------- ;;
 ;; PACKAGE: neotree ;;
 ;; ---------------- ;;
 (prelude-require-package 'neotree)
 (require 'neotree)
-(global-set-key [f8] 'neotree-toggle)
+(use-package neotree
+  :ensure t
+  :bind (("<f8>" . neotree-toggle))
+  :init
+  :config
+  )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -------------------- ;;
 ;; PACKAGE: sr-speedbar ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; -------------------- ;;
 (prelude-require-package 'sr-speedbar)
 (require 'sr-speedbar)
-(setq sr-speedbar-toggle t)
-(setq sr-speedbar-skip-other-window-p t)
+(use-package sr-speedbar
+  :ensure t
+  :config
+  (setq sr-speedbar-toggle t)
+  (setq sr-speedbar-skip-other-window-p t)
+  )
