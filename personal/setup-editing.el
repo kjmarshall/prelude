@@ -58,9 +58,10 @@
                                           newline-mark))
                             (whitespace-mode 1)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Customized functions                ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; -------------------- ;;
+;; Customized functions ;;
+;; -------------------- ;;
 (defun prelude-move-beginning-of-line (arg)
   "Move point back to indentation of beginning of line.
 

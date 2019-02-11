@@ -1,6 +1,8 @@
 (provide 'setup-programming)
-;; GROUP: Programming -> Languages -> C
 
+;; ------------------------------------ ;;
+;; GROUP: Programming -> Languages -> C ;;
+;; ------------------------------------ ;;
 ;; Available C style:
 ;; “gnu”: The default style for GNU projects
 ;; “k&r”: What Kernighan and Ritchie, the authors of C used in their book
@@ -15,19 +17,17 @@
 (setq c-default-style "stroustrup") ;; BSD/Allman brackets
 (setq c-basic-offset 2)      ;; 4-space indent
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ---------------------------------- ;;
 ;; GROUP: Programming -> Tools -> Gdb ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ---------------------------------- ;;
 (setq gdb-many-windows t        ; use gdb-many-windows by default
       gdb-show-main t)          ; Non-nil means display source file containing the main routine at startup
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ------------------------------------------ ;;
 ;; GROUP: Programming -> Tools -> Compilation ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ------------------------------------------ ;;
 ;; Compilation from Emacs
-;;;;;;;;;;;;;;;;;;;;;;;
-;; Compilation setup ;;
-;;;;;;;;;;;;;;;;;;;;;;;
+;; Compilation setup
 (require 'compile)
 ;; (setq compilation-disable-input nil)
 ;; (setq compilation-scroll-output t)
@@ -70,15 +70,12 @@
 (add-hook 'makefile-mode-hook (lambda ()
                                 (run-hooks 'prelude-makefile-mode-hook)))
 
-;; GROUP: Programming -> Tools -> Ediff
+;; ------------------------------------ ;;
+;; GROUP: Programming -> Tools -> Ediff ;;
+;; ------------------------------------ ;;
 (setq ediff-diff-options "-w"
       ediff-split-window-function 'split-window-horizontally
       ediff-window-setup-function 'ediff-setup-windows-plain)
-
-;; make c++ mode apply to .hpp and .h header files
-(add-to-list 'auto-mode-alist '("\\.hpp\\'" . c++-mode))
-(add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
-(add-to-list 'auto-mode-alist '("\\.tpp\\'" . c++-mode))
 
 ;; ------------------------------------ ;;
 ;; PACKAGE: magit                       ;;
@@ -107,6 +104,27 @@
 (global-set-key (kbd "C-x g r") 'magit-reflog)
 (global-set-key (kbd "C-x g t") 'magit-tag)
 
+
+;; ------------------- ;;
+;; Package: git-gutter ;;
+;; ------------------- ;;
+(use-package git-gutter
+  :ensure t
+  :init
+  (eval-when-compile
+    ;; Silence missing function warnings
+    (declare-function global-git-gutter-mode "git-gutter.el"))
+  :config
+  ;; If you enable global minor mode
+  (global-git-gutter-mode t)
+  ;; Auto update every 5 seconds
+  (custom-set-variables
+   '(git-gutter:update-interval 5))
+
+  ;; Set the foreground color of modified lines to something obvious
+  (set-face-foreground 'git-gutter:modified "purple")
+  )
+
 ;; --------------------------------------- ;;
 ;; PACKAGE: flycheck                       ;;
 ;;                                         ;;
@@ -124,14 +142,3 @@
 (prelude-require-package 'flycheck-tip)
 (require 'flycheck-tip)
 ;; (flycheck-tip-use-timer 'verbose)
-
-
-;; ------------------ ;;
-;; PACKAGE: cuda-mode ;;
-;;                    ;;
-;; GROUP: Programming ;;
-;; ------------------ ;;
-(prelude-require-package 'cuda-mode)
-(require 'cuda-mode)
-(add-to-list 'auto-mode-alist '("\\.cu\\'" . c++-mode))
-(add-to-list 'auto-mode-alist '("\\.cuh\\'" . c++-mode))

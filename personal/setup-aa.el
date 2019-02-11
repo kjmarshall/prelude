@@ -4,9 +4,26 @@
 (prelude-require-package 'use-package)
 (require 'use-package)
 
+;; ---------------------------- ;;
+;; PACKAGE: auto-package-update ;;
+;; ---------------------------- ;;
+;; Auto update packages once a week
+;; (prelude-require-package 'auto-package-update)
+;; (use-package auto-package-update
+;;   :ensure t
+;;   :commands (auto-package-update-maybe)
+;;   :init
+;;   (setq auto-package-update-delete-old-versions t)
+;;   (setq auto-package-update-hide-results t)
+;;   (auto-package-update-maybe)
+;;   (add-hook 'auto-package-update-before-hook
+;;             (lambda () (message "I will update packages now")))
+;;   )
+
 ;; ---------- ;;
 ;; PACKAGE: s ;;
 ;; ---------- ;;
+;; emacs string manipulation library
 (prelude-require-package 's)
 (use-package s
   :ensure t
@@ -33,30 +50,52 @@
 (setq prelude-whitespace nil)
 (setq prelude-clean-whitespace-on-save nil)
 
-;; ---------------------------- ;;
-;; PACKAGE: auto-package-update ;;
-;; ---------------------------- ;;
-;; Auto update packages once a week
-(prelude-require-package 'auto-package-update)
-(use-package auto-package-update
+;; -------------------------------------------- ;;
+;; PACKAGE: projectile additional configuration ;;
+;; -------------------------------------------- ;;
+(prelude-require-package 'projectile)
+(require 'projectile)
+(use-package projectile
   :ensure t
-  :commands (auto-package-update-maybe)
+  :bind-keymap
+  ("C-c p" . projectile-command-map)
   :config
-  (setq auto-package-update-delete-old-versions t)
-  (setq auto-package-update-hide-results t)
-  (auto-package-update-maybe)
-  (add-hook 'auto-package-update-before-hook
-            (lambda () (message "I will update packages now")))
+  (setq projectile-enable-caching t)
   )
 
-;; ------------------------------------- ;;
-;; PACKAGE: ein (emacs ipython notebook) ;;
-;; ------------------------------------- ;;
-(prelude-require-package 'ein)
-(require 'ein)
-(use-package ein
+;; --------------------------- ;;
+;; Package: yasnippet          ;;
+;;                             ;;
+;; GROUP: Editing -> Yasnippet ;;
+;; --------------------------- ;;
+(prelude-require-package 'yasnippet)
+(use-package yasnippet
   :ensure t
+  :commands (yas-reload-all)
+  :init
+  (eval-when-compile
+    ;; Silence missing function warnings
+    (declare-function yas-global-mode "yasnippet.el"))
+  :config
+  (yas-reload-all)
+  :hook
+  (prog-mode . yas-minor-mode)
   )
+(use-package yasnippet-snippets
+  :ensure t
+  :commands (yas-reload-all)
+  :config
+  (yas-reload-all)
+  :after (yasnippet)
+  )
+;; Apparently the company-yasnippet backend shadows all backends that
+;; come after it. To work around this we assign yasnippet to a different
+;; keybind since actual source completion is vital.
+;; (use-package company-yasnippet
+;;   :ensure t
+;;   :bind ("C-M-y" . company-yasnippet)
+;;   :after (yasnippet)
+;;   )
 
 ;; ---------------- ;;
 ;; PACKAGE: Company ;;
@@ -67,6 +106,9 @@
 (use-package company
   :ensure t
   :init
+  (global-company-mode 1)
+  :hook ( after-init . global-company-mode )
+  :config
   (setq company-idle-delay 0.5)
   (setq company-show-numbers t)
   (setq company-tooltip-limit 10)
@@ -77,12 +119,6 @@
   ;; invert the navigation direction if the the completion popup-isearch-match
   ;; is displayed on top (happens near the bottom of windows)
   (setq company-tooltip-flip-when-above t)
-
-  (global-company-mode 1)
-  :hook ( after-init . global-company-mode )
-  :config
-  ;; Zero delay when pressing tab
-  ;; (setq company-idle-delay 0)
   ;; remove unused backends
   (setq company-backends (delete 'company-semantic company-backends))
   (setq company-backends (delete 'company-eclim company-backends))
@@ -91,8 +127,8 @@
   (setq company-backends (delete 'company-bbdb company-backends))
   (setq company-backends (delete 'company-oddmuse company-backends))
   ;; (setf company-backends '())
-  (add-to-list 'company-backends 'company-keywords)
   (add-to-list 'company-backends 'company-yasnippet)
+  (add-to-list 'company-backends 'company-keywords)
   (add-to-list 'company-backends 'company-dabbrev-code)
   (add-to-list 'company-backends 'company-files)
   (add-to-list 'company-backends 'company-dabbrev)
@@ -100,6 +136,15 @@
   :bind ("C-;" . company-complete-common)
   )
 
+;; -------------------------- ;;
+;; PACKAGE: company-c-headers ;;
+;; -------------------------- ;;
+(use-package company-c-headers
+  :ensure t
+  :init
+  (add-to-list 'company-backends 'company-c-headers)
+  :after (company)
+  )
 
 ;; ;; ---------------------- ;;
 ;; ;; PACKAGE: company-irony ;;
@@ -122,51 +167,17 @@
 ;;   :after (company)
 ;;   )
 
-;; --------------------------- ;;
-;; Package: yasnippet          ;;
-;;                             ;;
-;; GROUP: Editing -> Yasnippet ;;
-;; --------------------------- ;;
-(prelude-require-package 'yasnippet)
-(use-package yasnippet
-  :ensure t
-  :commands (yas-reload-all)
-  :init
-  (eval-when-compile
-    ;; Silence missing function warnings
-    (declare-function yas-global-mode "yasnippet.el"))
-  :defer 5
-  :config
-  (yas-global-mode t)
-  (yas-reload-all)
-  )
-(use-package yasnippet-snippets
-  :ensure t
-  :config
-  (yas-reload-all)
-  :after (yasnippet)
-  )
-
-;; Apparently the company-yasnippet backend shadows all backends that
-;; come after it. To work around this we assign yasnippet to a different
-;; keybind since actual source completion is vital.
-;; (use-package company-yasnippet
-;;   :ensure t
-;;   :bind ("C-M-y" . company-yasnippet)
-;;   :after (company yasnippet)
-;;   )
-
 ;; -------------- ;;
 ;; PACKAGE: Irony ;;
 ;; -------------- ;;
 ;; Use irony for completion
 ;; (use-package irony
 ;;   :ensure t
-;;   :defer t
+;;   :commands irony-mode
 ;;   :init
-;;   (add-hook 'c++-mode-hook 'irony-mode)
-;;   (add-hook 'c-mode-hook 'irony-mode)
-;;   (add-hook 'objc-mode-hook 'irony-mode)
+;;   (add-hook 'c++-mode-hook #'irony-mode)
+;;   (add-hook 'c-mode-hook #'irony-mode)
+;;   (add-hook 'objc-mode-hook #'irony-mode)
 ;;   :config
 ;;   ;; replace the `completion-at-point' and `complete-symbol' bindings in
 ;;   ;; irony-mode's buffers by irony-mode's function
@@ -175,8 +186,8 @@
 ;;       'irony-completion-at-point-async)
 ;;     (define-key irony-mode-map [remap complete-symbol]
 ;;       'irony-completion-at-point-async))
-;;   (add-hook 'irony-mode-hook 'my-irony-mode-hook)
-;;   (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
+;;   (add-hook 'irony-mode-hook #'my-irony-mode-hook)
+;;   (add-hook 'irony-mode-hook #'irony-cdb-autosetup-compile-options)
 ;;   )
 
 ;; ---------------- ;;
@@ -196,89 +207,6 @@
 ;;  :compile-cmd "gmake cc=gcc type=release ext=none -sj24 redist"
 ;;  :test-cmd "" )
 
-;; -------------------------------------------- ;;
-;; PACKAGE: projectile additional configuration ;;
-;; -------------------------------------------- ;;
-(prelude-require-package 'projectile)
-(require 'projectile)
-(use-package projectile
-  :ensure t
-  :bind-keymap
-  ("C-c p" . projectile-command-map)
-  :config
-  (setq projectile-enable-caching t)
-  )
-
-;; --------------------------------------------------------------- ;;
-;; Rainbow Delimiters -  have delimiters be colored by their depth ;;
-;; --------------------------------------------------------------- ;;
-(prelude-require-package 'rainbow-delimiters)
-(require 'rainbow-delimiters)
-(use-package rainbow-delimiters
-  :ensure t
-  :init
-  (eval-when-compile
-    ;; Silence missing function warnings
-    (declare-function rainbow-delimiters-mode "rainbow-delimiters.el"))
-  (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
-  )
-
-;; ----------------------------------------------------------------- ;;
-;; Beacon-mode: flash the cursor when switching buffers or scrolling ;;
-;;               the goal is to make it easy to find the cursor      ;;
-;; ----------------------------------------------------------------- ;;
-(prelude-require-package 'beacon)
-(require 'beacon)
-(use-package beacon
-  :ensure t
-  :init
-  (eval-when-compile
-    ;; Silence missing function warnings
-    (declare-function beacon-mode "beacon.el"))
-  :config
-  (beacon-mode t)
-  )
-
-;; ------------------------------------------------------------ ;;
-;; which-key: when you pause on a keyboard shortcut it provides ;;
-;;             suggestions in a popup buffer                    ;;
-;; ------------------------------------------------------------ ;;
-(prelude-require-package 'which-key)
-(require 'which-key)
-(use-package which-key
-  :ensure t
-  :init
-  (eval-when-compile
-    ;; Silence missing function warnings
-    (declare-function which-key-mode "which-key.el"))
-  :config
-  (which-key-mode)
-  )
-
-;; ---------------- ;;
-;; CLANG formatting ;;
-;; ---------------- ;;
-;; clang-format can be triggered using C-c C-f
-;; Create clang-format file using google style
-;; clang-format -style=google -dump-config > .clang-format
-(prelude-require-package 'clang-format)
-(require 'clang-format)
-(use-package clang-format
-  :ensure t
-  :bind (("C-c C-f" . clang-format-region))
-  )
-
-;; ----------------------------- ;;
-;; PACKAGE: modern-cpp-font-lock ;;
-;; ----------------------------- ;;
-(prelude-require-package 'modern-cpp-font-lock)
-(require 'modern-cpp-font-lock)
-(use-package modern-cpp-font-lock
-  :ensure t
-  :init
-  (setq modern-c++-font-lock-global-mode t)
-  )
-
 ;; ----------------------------- ;;
 ;; PACKAGE: ycmd code completion ;;
 ;; ----------------------------- ;;
@@ -292,7 +220,8 @@
 (require 'company-ycmd)
 (prelude-require-package 'flycheck-ycmd)
 (require 'flycheck-ycmd)
-(defvar my:ycmd-server-command `("/nfs/pdx/home/kmarshal/km-nfs/python-3.7.0/bin/python3" ,(file-truename "~/.emacs.d/external/ycmd/ycmd/")))
+;; (defvar my:ycmd-server-command `("/nfs/pdx/home/kmarshal/km-nfs/python-3.7.0/bin/python3" ,(file-truename "~/.emacs.d/external/ycmd/ycmd/")))
+(defvar my:ycmd-server-command `("python3" ,(file-truename "~/.emacs.d/external/ycmd/ycmd/")))
 (defvar my:ycmd-extra-conf-whitelist `( ,(file-truename "~/.emacs.d/ycm_configs/*")
                                         ,(file-truename "~/km-nfs/ImagingTools/.ycm_extra_conf.py") ) )
 (defvar my:ycmd-global-config (file-truename "~/.emacs.d/ycm_global_extra_conf.py") )
@@ -318,94 +247,58 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
          (file-directory-p (nth 1 my:ycmd-server-command)))
     (use-package ycmd
       :ensure t
+      :commands ycmd-mode
       :init
-      (eval-when-compile
-        ;; Silence missing function warnings
-        (declare-function global-ycmd-mode "ycmd.el"))
-      (add-hook 'after-init-hook #'global-ycmd-mode)
+      ;; (eval-when-compile
+      ;;   ;; Silence missing function warnings
+      ;;   (declare-function global-ycmd-mode "ycmd.el"))
+      ;; (add-hook 'after-init-hook #'global-ycmd-mode)
+      (add-hook 'c-mode-common-hook #'ycmd-mode)
+      (setq ycmd-force-semantic-completion t)
       :config
       (progn
         (set-variable 'ycmd-server-command my:ycmd-server-command)
         (set-variable 'ycmd-extra-conf-whitelist my:ycmd-extra-conf-whitelist)
         (set-variable 'ycmd-global-config my:ycmd-global-config)
-        (setq ycmd-force-semantic-completion t)
         (use-package company-ycmd
           :ensure t
           :init
           (eval-when-compile
             ;; Silence missing function warnings
             (declare-function company-ycmd-setup "company-ycmd.el"))
-          :config
           (company-ycmd-setup)
+          :config
+          (add-to-list 'company-backends 'company-ycmd)
           )
 
         (use-package flycheck-ycmd
           :ensure t
+          :commands flycheck-ycmd-setup
           :init
-          (add-hook 'c-mode-common-hook 'flycheck-ycmd-setup)
+          (add-hook 'c-mode-common-hook #'flycheck-ycmd-setup)
           )
 
         ;; Add displaying the function arguments in mini buffer using El Doc
-        (require 'ycmd-eldoc)
-        (add-hook 'ycmd-mode-hook 'ycmd-eldoc-setup)
+        ;; (use-package ycmd-eldoc
+        ;;   :ensure t
+        ;;   :commands ycmd-eldoc-setup
+        ;;   :init
+        ;;   (add-hook 'ycmd-mode-hook #'ycmd-eldoc-setup)
+        ;;   )
         )
       )
   )
 
-;; ----------------------------- ;;
-;; PACKAGE: Python Mode Settings ;;
-;; ----------------------------- ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Python mode settings
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(setq-default python-indent 4)
-(setq-default python-indent-offset 4)
-(add-hook 'python-mode-hook
-          (lambda ()
-            (setq tab-width 4)))
-(setq-default pdb-command-name "python3 -m pdb")
-(prelude-require-package 'elpy)
-(use-package elpy
-  :ensure t
-  :commands (elpy-enable)
-  :after python
-  :config
-  (elpy-enable)
-  )
-
-;; (prelude-require-package 'yapfify)
-;; (use-package yapfify
-;;   :ensure t
-;;   :init
-;;   (add-hook 'python-mode-hook 'yapf-mode))
-
-;; --------------------- ;;
-;; PACKAGE: company-jedi ;;
-;; --------------------- ;;
-;; Setup loading company-jedi for python completion
-;; This requires running jedi:install-server the first time
-(prelude-require-package 'company-jedi)
-(require 'company-jedi)
-(use-package company-jedi
-  :ensure t
-  :after python
-  :init
-  (defun my/python-mode-hook ()
-    (add-to-list 'company-backends 'company-jedi))
-  (add-hook 'python-mode-hook 'my/python-mode-hook)
-  )
-
-
 ;; ----------------- ;;
 ;; PACKAGE: ess-view ;;
 ;; ----------------- ;;
-(prelude-require-package 'ess-view)
-(require 'ess-view)
-(use-package ess-view
-  :ensure t
-  :init
-  :config
-  )
+;; (prelude-require-package 'ess-view)
+;; (require 'ess-view)
+;; (use-package ess-view
+;;   :ensure t
+;;   :init
+;;   :config
+;;   )
 
 ;; -------------- ;;
 ;; PACKAGE: eldoc ;;
@@ -414,7 +307,8 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
 (require 'eldoc)
 (use-package eldoc
   :diminish eldoc-mode
-  :init (add-hook 'ycmd-mode-hook 'ycmd-eldoc-setup)
+  :init
+  (add-hook 'ycmd-mode-hook #'ycmd-eldoc-setup)
   )
 
 ;; ---------------------- ;;
@@ -561,17 +455,12 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
 ;;   (add-hook 'c-mode-hook 'flycheck-irony-setup)
 ;;   )
 
-(prelude-require-package 'flycheck-pyflakes)
-(use-package flycheck-pyflakes
-  :ensure t
-  :after python
-  )
-
-;; --------------------------------------------------------- ;;
-;; PACKAGE: string-inflection                                         ;;
-;; used for switching between different cases, eg CamelCase, ;;
-;; lowerCamelCase, snake_case, and SCREAMING_SNAKE_CASE      ;;
-;; --------------------------------------------------------- ;;
+;; ------------------------------------------- ;;
+;; PACKAGE: string-inflection                  ;;
+;; used for switching between different cases, ;;
+;; e.g. CamelCase, lowerCamelCase,             ;;
+;;      snake_case, and SCREAMING_SNAKE_CASE   ;;
+;; ------------------------------------------- ;;
 (prelude-require-package 'string-inflection)
 (use-package string-inflection
   :ensure t
@@ -584,71 +473,23 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
          )
   )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; web-mode
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(prelude-require-package 'web-mode)
-(use-package web-mode
-  :ensure t
-  :mode (("\\.phtml\\'" . web-mode)
-         ("\\.tpl\\.php\\'" . web-mode)
-         ("\\.[agj]sp\\'" . web-mode)
-         ("\\.as[cp]x\\'" . web-mode)
-         ("\\.erb\\'" . web-mode)
-         ("\\.mustache\\'" . web-mode)
-         ("\\.djhtml\\'" . web-mode)
-         ("\\.html?\\'" . web-mode))
-  )
-
-;; ---------------------- ;;
-;; PACKAGE: markdown-mode ;;
-;; ---------------------- ;;
-;; Use markdown-mode for markdown files
-(prelude-require-package 'markdown-mode)
-(use-package markdown-mode
-  :ensure t
-  :mode (".md" ".markdown")
-  )
-
-;; ------------------ ;;
-;; PACKAGE: cuda-mode ;;
-;; ------------------ ;;
-;; Syntax Highlighting in CUDA
-;; Load CUDA mode so we get syntax highlighting in .cu files
-(prelude-require-package 'cuda-mode)
-(use-package cuda-mode
-  :ensure t
-  :mode (("\\.cu\\'" . cuda-mode)
-         ("\\.cuh\\'" . cuda-mode))
-  )
-
-;; -------------------- ;;
-;; insert date and time ;;
-;; -------------------- ;;
-(defvar current-date-time-format "%a %b %d %H:%M:%S %Z %Y"
-  "Format of date to insert with `insert-current-date-time' func
-See help of `format-time-string' for possible replacements")
-
-(defvar current-time-format "%a %H:%M:%S"
-  "Format of date to insert with `insert-current-time' func.
-Note the weekly scope of the command's precision.")
-
-(defun insert-current-date-time ()
-  "insert the current date and time into current buffer.
-Uses `current-date-time-format' for the formatting the date/time."
-       (interactive)
-       ;; (insert "==========\n")
-;       (insert (let () (comment-start)))
-       (insert (format-time-string current-date-time-format (current-time)))
-       (insert "\n")
-       )
-
-(defun insert-current-time ()
-  "insert the current time (1-week scope) into the current buffer."
-       (interactive)
-       (insert (format-time-string current-time-format (current-time)))
-       (insert "\n")
-       )
-
-(global-set-key "\C-c\C-d" 'insert-current-date-time)
-(global-set-key "\C-c\C-t" 'insert-current-time)
+;;require section
+;; (require 'setup-applications)
+;; (require 'setup-communication)
+;; (require 'setup-convenience)
+;; (require 'setup-data)
+;; (require 'setup-development)
+;; (require 'setup-editing)
+;; (require 'setup-environment)
+;; (require 'setup-external)
+;; (require 'setup-faces-and-ui)
+;; (require 'setup-file-modes)
+;; (require 'setup-files)
+;; (require 'setup-helm)
+;; (require 'setup-help)
+;; (require 'setup-latex)
+;; (require 'setup-local)
+;; (require 'setup-programming)
+;; (require 'setup-python)
+;; (require 'setup-tempo-c-cpp)
+;; (require 'setup-text)

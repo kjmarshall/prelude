@@ -3,14 +3,15 @@
 ;; ---------------------------- ;;
 ;; GROUP: Convenience -> Revert ;;
 ;; ---------------------------- ;;
-
 ;; update any change made on file to the current buffer
 (global-auto-revert-mode)
 
-;; GROUP: Convenience -> Hippe Expand
-;; hippie-expand is a better version of dabbrev-expand.
-;; While dabbrev-expand searches for words you already types, in current;; buffers and other buffers, hippie-expand includes more sources,
-;; such as filenames, klll ring...
+;; --------------------------------------------------------------------------------------------------------------------------------------- ;;
+;; GROUP: Convenience -> Hippe Expand                                                                                                      ;;
+;; hippie-expand is a better version of dabbrev-expand.                                                                                    ;;
+;; While dabbrev-expand searches for words you already types, in current;; buffers and other buffers, hippie-expand includes more sources, ;;
+;; such as filenames, klll ring...                                                                                                         ;;
+;; --------------------------------------------------------------------------------------------------------------------------------------- ;;
 (global-set-key (kbd "M-/") 'hippie-expand) ;; replace dabbrev-expand
 (setq
  hippie-expand-try-functions-list
@@ -26,26 +27,34 @@
    try-complete-lisp-symbol) ;; Try to complete word as an Emacs Lisp symbol.
  )
 
-;; GROUP: Convenience -> HL Line
+;; ----------------------------- ;;
+;; GROUP: Convenience -> HL Line ;;
+;; ----------------------------- ;;
 (global-hl-line-mode)
 
-;; GROUP: Convenience -> Ibuffer
+;; ----------------------------- ;;
+;; GROUP: Convenience -> Ibuffer ;;
+;; ----------------------------- ;;
 (setq ibuffer-use-other-window t) ;; always display ibuffer in another window
 
-;; GROUP: Convenience -> Linum
+;; --------------------------- ;;
+;; GROUP: Convenience -> Linum ;;
+;; --------------------------- ;;
 (add-hook 'prog-mode-hook 'linum-mode) ;; enable linum only in programming modes
 
-;; GROUP: Convenience -> Whitespace
-
-;; whenever you create useless whitespace, the whitespace is highlighted
+;; --------------------------------------------------------------------- ;;
+;; GROUP: Convenience -> Whitespace                                      ;;
+;; whenever you create useless whitespace, the whitespace is highlighted ;;
+;; --------------------------------------------------------------------- ;;
 (add-hook 'prog-mode-hook (lambda () (interactive) (setq show-trailing-whitespace 1)))
 
 ;; activate whitespace-mode to view all whitespace characters
 (global-set-key (kbd "C-c w") 'whitespace-mode)
 
-;; GROUP: Convenience -> Windmove
-
-;; easier window navigation
+;; ------------------------------ ;;
+;; GROUP: Convenience -> Windmove ;;
+;; easier window navigation       ;;
+;; ------------------------------ ;;
 (windmove-default-keybindings)
 
 (defalias 'eb 'eval-buffer)
@@ -146,3 +155,105 @@
   (setq sr-speedbar-toggle t)
   (setq sr-speedbar-skip-other-window-p t)
   )
+
+;; --------------------------------------------------------------- ;;
+;; Rainbow Delimiters -  have delimiters be colored by their depth ;;
+;; --------------------------------------------------------------- ;;
+(prelude-require-package 'rainbow-delimiters)
+(require 'rainbow-delimiters)
+(use-package rainbow-delimiters
+  :ensure t
+  :init
+  (eval-when-compile
+    ;; Silence missing function warnings
+    (declare-function rainbow-delimiters-mode "rainbow-delimiters.el"))
+  :hook
+  (prog-mode . rainbow-delimiters-mode)
+  )
+
+;; ----------------------------------------------------------------- ;;
+;; Beacon-mode: flash the cursor when switching buffers or scrolling ;;
+;;               the goal is to make it easy to find the cursor      ;;
+;; ----------------------------------------------------------------- ;;
+(prelude-require-package 'beacon)
+(require 'beacon)
+(use-package beacon
+  :ensure t
+  :init
+  (eval-when-compile
+    ;; Silence missing function warnings
+    (declare-function beacon-mode "beacon.el"))
+  :config
+  (beacon-mode t)
+  )
+
+;; ------------------------------------------------------------ ;;
+;; which-key: when you pause on a keyboard shortcut it provides ;;
+;;             suggestions in a popup buffer                    ;;
+;; ------------------------------------------------------------ ;;
+(prelude-require-package 'which-key)
+(require 'which-key)
+(use-package which-key
+  :ensure t
+  :init
+  (eval-when-compile
+    ;; Silence missing function warnings
+    (declare-function which-key-mode "which-key.el"))
+  :config
+  (which-key-mode)
+  )
+
+;; ---------------- ;;
+;; CLANG formatting ;;
+;; ---------------- ;;
+;; clang-format can be triggered using C-c C-f
+;; Create clang-format file using google style
+;; clang-format -style=google -dump-config > .clang-format
+(prelude-require-package 'clang-format)
+(require 'clang-format)
+(use-package clang-format
+  :ensure t
+  :bind (("C-c C-f" . clang-format-region))
+  )
+
+;; ----------------------------- ;;
+;; PACKAGE: modern-cpp-font-lock ;;
+;; ----------------------------- ;;
+(prelude-require-package 'modern-cpp-font-lock)
+(require 'modern-cpp-font-lock)
+(use-package modern-cpp-font-lock
+  :ensure t
+  :init
+  (setq modern-c++-font-lock-global-mode t)
+  )
+
+;; -------------------- ;;
+;; insert date and time ;;
+;; -------------------- ;;
+(defvar current-date-time-format "%a %b %d %H:%M:%S %Z %Y"
+  "Format of date to insert with `insert-current-date-time' func
+See help of `format-time-string' for possible replacements")
+
+(defvar current-time-format "%a %H:%M:%S"
+  "Format of date to insert with `insert-current-time' func.
+Note the weekly scope of the command's precision.")
+
+(defun insert-current-date-time ()
+  "insert the current date and time into current buffer.
+Uses `current-date-time-format' for the formatting the date/time."
+       (interactive)
+       ;; (insert "==========\n")
+;       (insert (let () (comment-start)))
+       (insert (format-time-string current-date-time-format (current-time)))
+       (insert "\n")
+       )
+
+(defun insert-current-time ()
+  "insert the current time (1-week scope) into the current buffer."
+       (interactive)
+       (insert (format-time-string current-time-format (current-time)))
+       (insert "\n")
+       )
+
+(global-set-key "\C-c\C-d" 'insert-current-date-time)
+(global-set-key "\C-c\C-t" 'insert-current-time)

@@ -1,13 +1,13 @@
 (provide 'setup-files)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; group: Files                      ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ------------ ;;
+;; group: Files ;;
+;; ------------ ;;
 (setq large-file-warning-threshold 100000000) ;; size in bytes
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; GROUP: Files -> Back up            ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ----------------------- ;;
+;; GROUP: Files -> Back up ;;
+;; ----------------------- ;;
 (defvar backup-directory (file-truename "~/.emacs.d/backups"))
 (if (not (file-exists-p backup-directory))
     (make-directory backup-directory t))
@@ -24,9 +24,9 @@
  auto-save-interval 200 ; number of keystrokes between auto-saves (default: 300)
  )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; GROUP: Files -> Dired              ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; --------------------- ;;
+;; GROUP: Files -> Dired ;;
+;; --------------------- ;;
 (setq
  dired-dwim-target t            ; if another Dired buffer is visibpple in another window, use that directory as target for Rename/Copy
  dired-recursive-copies 'always         ; "always" means no asking
@@ -57,9 +57,9 @@
 ;; (define-key dired-mode-map "V" 'dired-do-run-mail)
 (require 'dired-x) ; provide extra commands for Dired
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; GROUP: Files -> Dired -> Wdired    ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ------------------------------- ;;
+;; GROUP: Files -> Dired -> Wdired ;;
+;; ------------------------------- ;;
 ;; wdired allows you to edit a Dired buffer and write changes to disk
 ;; - Switch to Wdired by C-x C-q
 ;; - Edit the Dired buffer, i.e. change filenames
@@ -70,9 +70,9 @@
  wdired-allow-to-redirect-links t     ; allow to edit symlinks
  )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; GROUP: Files -> Recentf            ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ----------------------- ;;
+;; GROUP: Files -> Recentf ;;
+;; ----------------------- ;;
 (recentf-mode)
 (setq
  recentf-max-menu-items 30

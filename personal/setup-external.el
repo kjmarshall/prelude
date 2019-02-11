@@ -1,6 +1,8 @@
 (provide 'setup-external)
 
-;; GROUP: Processes -> Flyspell
+;; ---------------------------- ;;
+;; GROUP: Processes -> Flyspell ;;
+;; ---------------------------- ;;
 (if (executable-find "aspell")
     (progn
       (setq ispell-program-name "aspell")
