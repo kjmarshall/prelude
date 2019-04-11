@@ -1,6 +1,9 @@
 (provide 'setup-editing)
 (global-set-key (kbd "<return>") (kbd "RET"))
 
+(add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
+(add-to-list 'auto-mode-alist '("\\.tpp\\'" . c++-mode))
+
 ;; -------------------------- ;;
 ;; GROUP: Edit -> Parentheses ;;
 ;; -------------------------- ;;
