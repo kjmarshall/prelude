@@ -221,7 +221,7 @@
 (prelude-require-package 'flycheck-ycmd)
 (require 'flycheck-ycmd)
 ;; (defvar my:ycmd-server-command `("/nfs/pdx/home/kmarshal/km-nfs/python-3.7.0/bin/python3" ,(file-truename "~/.emacs.d/external/ycmd/ycmd/")))
-(defvar my:ycmd-server-command `("python3" ,(file-truename "~/.emacs.d/external/ycmd/ycmd/")))
+(defvar my:ycmd-server-command `( ,(getenv "EMACS_YCMD_PYTHON") ,(file-truename "~/.emacs.d/external/ycmd/ycmd/")))
 (defvar my:ycmd-extra-conf-whitelist `( ,(file-truename "~/.emacs.d/ycm_configs/*")
                                         ,(file-truename "~/km-nfs/ImagingTools/.ycm_extra_conf.py") ) )
 (defvar my:ycmd-global-config (file-truename "~/.emacs.d/ycm_global_extra_conf.py") )
@@ -247,13 +247,17 @@ Please set my:ycmd-server-command appropriately in ~/.emacs.el.\n"
          (file-directory-p (nth 1 my:ycmd-server-command)))
     (use-package ycmd
       :ensure t
-      :commands ycmd-mode
+      :commands (ycmd-mode ycmd-eldoc-setup)
       :init
       ;; (eval-when-compile
       ;;   ;; Silence missing function warnings
       ;;   (declare-function global-ycmd-mode "ycmd.el"))
       ;; (add-hook 'after-init-hook #'global-ycmd-mode)
       (add-hook 'c-mode-common-hook #'ycmd-mode)
+      (add-hook 'c-mode-hook #'ycmd-mode)
+      (add-hook 'c++-mode-hook #'ycmd-mode)
+      (add-hook 'python-mode-hook #'ycmd-mode)
+      (add-hook 'ycmd-mode-hook #'ycmd-eldoc-setup)
       (setq ycmd-force-semantic-completion t)
       :config
       (progn
