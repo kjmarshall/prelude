@@ -225,6 +225,9 @@
   :ensure t
   :init
   (setq modern-c++-font-lock-global-mode t)
+  :hook
+  (c++-mode-hook . modern-c++-font-lock-mode)
+  (c-mode-common-hook . modern-c++-font-lock-mode)
   )
 
 ;; -------------------- ;;
