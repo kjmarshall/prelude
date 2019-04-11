@@ -335,7 +335,8 @@ line instead."
 (require 'clean-aindent-mode)
 (use-package clean-aindent-mode
   :ensure t
-  :hook ((prog-mode . clean-aindent-mode))
+  :hook
+  (prog-mode . clean-aindent-mode)
   )
 
 ;; -------------------- ;;
@@ -356,7 +357,8 @@ line instead."
 (require 'ws-butler)
 (use-package ws-butler
   :ensure t
-  :hook ((c-mode-common . ws-butler-mode))
+  :hook
+  (prog-mode . ws-butler-mode)
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
